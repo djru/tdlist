@@ -14,7 +14,7 @@
                         </v-card-title>
                         <v-card-actions>
                            <v-btn flat @click="() => {navigateToList(l.id)}">View List</v-btn>
-                           <v-btn flat color="red" @click="() => {deleteList(l.id)}">Delete</v-btn>
+                           <v-btn flat color="red" @click="() => {showDeleteDialog(l.id)}">Delete</v-btn>
                         </v-card-actions>
                      </v-card>
                </v-flex></v-container>
@@ -45,6 +45,16 @@
           </v-card-text>
         </v-card>
       </v-dialog>
+      <v-dialog v-model="deleteDialog" max-width="500px">
+        <v-card>
+          <v-card-title>
+            <div class="title">Are you sure you want to delete this list?</div>
+          </v-card-title>
+          <v-card-text>
+            <v-btn color="error" block @click="deleteList">Delete This List</v-btn>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
     </div>
 </template>
 
@@ -58,7 +68,9 @@ export default {
   data: function () {
     return {
       newListTitle: '',
-      newListDialog: false
+      newListDialog: false,
+      deleteDialog: false,
+      listToDelete: null
     }
   },
   components: {ToDo, ItemsView},
@@ -69,11 +81,17 @@ export default {
     navigateToList (listId) {
       this.$router.push({name: 'ListView', params: { listId }})
     },
-    deleteList (listId) {
-      this.$store.dispatch('deepDeleteList', listId)
+    deleteList () {
+      this.$store.dispatch('deepDeleteList', this.listToDelete)
+      this.deleteDialog = false
+      this.listToDelete = null
     },
     showListDialog (e) {
       this.newListDialog = true
+    },
+    showDeleteDialog (id) {
+      this.listToDelete = id
+      this.deleteDialog = true
     },
     addList (e) {
       let tt = this.newListTitle.charAt(0).toUpperCase() + this.newListTitle.slice(1)
