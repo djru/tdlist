@@ -5,19 +5,19 @@
               <v-checkbox @click="deleteTodo"></v-checkbox>
             </v-list-tile-action>
             <v-list-tile-content>
-              <v-list-tile-title>{{todo.text}}</v-list-tile-title>
-              <v-list-tile-sub-title>[{{todo.id}}]</v-list-tile-sub-title>
+              <v-list-tile-title>{{item.text}}</v-list-tile-title>
+              <v-list-tile-sub-title>[{{item.id}}]</v-list-tile-sub-title>
             </v-list-tile-content>
           </v-list-tile>
 </template>
 
 <script>
 export default {
-  name: 'Todo',
-  props: ['todo'],
+  name: 'ToDo',
+  props: ['item'],
   methods: {
     deleteTodo (e) {
-      this.$store.commit('removeTodo', this.todo.id)
+      this.$store.commit('deleteToDo', this.item.id)
     }
   }
 }

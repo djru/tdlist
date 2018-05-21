@@ -1,43 +1,57 @@
 import Vuex from 'vuex'
 import Vue from 'vue'
+import uuid from 'uuid/v1'
 
 Vue.use(Vuex)
 
 const writeToLocal = store => {
   store.subscribe((m, s) => {
-    localStorage.setItem('todo-items-list', JSON.stringify(s))
+    localStorage.setItem('todo-items-list', JSON.stringify({lists: s.lists, items: s.items, searchTerm: ''}))
     console.log('saved state to locastorage with key `todo-items-list`')
   })
 }
 
 export default new Vuex.Store({
   state: {
-    todos: [],
+    lists: [{title: 'Example List', id: '123-456-789'}],
+    items: [{text: 'Example Item', id: '123-456-789', parentId: '123-456-789'}],
     searchTerm: ''
   },
   mutations: {
-    addTodo (state, todo) {
-      state.todos.push(todo)
+    addToDo (state, data) {
+      state.items.push({...data, id: uuid()})
     },
-    removeTodo (state, id) {
-      state.todos = this.state.todos.filter(e => {
-        return e.id !== id
-      })
+    deleteToDo (state, data) {
+      console.log(state.items)
+      state.items = state.items.filter(i => { return i.id !== data })
     },
-    setSearchTerm (state, term) {
-      state.searchTerm = term
+    addList (state, data) {
+      state.lists.push({title: data.title, id: data.id})
+    },
+    deleteList (state, data) {
+      state.lists = state.lists.filter(l => l.id !== data)
+    },
+    deleteChildrenItems (state, data) {
+      state.items = state.items.filter(i => { return i.parentId !== data })
     },
     initializeFromLocal (state) {
       if (localStorage.getItem('todo-items-list')) {
         Object.assign(state, JSON.parse(localStorage.getItem('todo-items-list')))
-        console.log('state retrieved from local storage')
       }
     }
   },
+  actions: {
+    deepDeleteList (context, data) {
+      context.commit('deleteList', data)
+      context.commit('deleteChildrenItems', data)
+    }
+  },
   getters: {
-    getTodosFromSearchTerm (state) {
-      let term = state.searchTerm.toLowerCase()
-      return state.todos.filter(s => s.text.toLowerCase().indexOf(term) > -1)
+    getItems: (state) => (listId) => {
+      return state.items.filter((s) => s.parentId === listId)
+    },
+    getList: (state) => (listId) => {
+      return state.lists.filter(l => l.id === listId)[0]
     }
   },
   plugins: [writeToLocal]
